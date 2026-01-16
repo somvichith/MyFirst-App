@@ -1,0 +1,8 @@
+{
+  "name": "សំ វិចិត្រ",
+  "description": "A comprehensive AI workspace featuring real-time voice conversation, multi-modal vision analysis, advanced image generation, and streaming text chat.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
