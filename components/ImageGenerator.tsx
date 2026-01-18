@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { GoogleGenAI } from '@google/genai';
 import { GeneratedImage } from '../types';
 
-const ImageGenerator: React.FC = () => {
+// Fix: Updated component to accept lang and t props as passed from App.tsx
+const ImageGenerator: React.FC<{ lang: string; t: any }> = ({ lang, t }) => {
   const [prompt, setPrompt] = useState('');
   const [aspectRatio, setAspectRatio] = useState<'1:1' | '16:9' | '9:16'>('1:1');
   const [style, setStyle] = useState('Realistic photography');
@@ -67,7 +68,7 @@ const ImageGenerator: React.FC = () => {
       {/* Controls */}
       <div className="lg:w-1/3 space-y-6">
         <div className="space-y-2">
-          <h2 className="text-3xl font-bold">Image Gen</h2>
+          <h2 className="text-3xl font-bold">{t.imageGen}</h2>
           <p className="text-gray-400">Bring your ideas to life with សំ វិចិត្រ.</p>
         </div>
 

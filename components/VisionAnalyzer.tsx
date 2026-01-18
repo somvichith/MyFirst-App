@@ -51,7 +51,8 @@ const VisionAnalyzer: React.FC<VisionAnalyzerProps> = ({ lang, t }) => {
         const context = canvas.getContext('2d');
         canvas.height = viewport.height;
         canvas.width = viewport.width;
-        await page.render({ canvasContext: context!, viewport }).promise;
+        // Fix: Added required 'canvas' property to RenderParameters for PDF.js v4 compatibility
+        await page.render({ canvasContext: context!, viewport, canvas }).promise;
         return canvas.toDataURL('image/jpeg', 0.8);
       });
 

@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useMemo } from 'react';
 
 interface AIAvatarProps {
   isTalking: boolean;
@@ -8,150 +8,114 @@ interface AIAvatarProps {
 }
 
 const AIAvatar: React.FC<AIAvatarProps> = ({ isTalking, volume, gender }) => {
-  const [blink, setBlink] = useState(false);
-  const [sway, setSway] = useState(0);
-
-  // Random Blinking logic
-  useEffect(() => {
-    const triggerBlink = () => {
-      setBlink(true);
-      setTimeout(() => setBlink(false), 150);
-      setTimeout(triggerBlink, Math.random() * 4000 + 1500);
-    };
-    const timeout = setTimeout(triggerBlink, 2000);
-    return () => clearTimeout(timeout);
-  }, []);
-
-  // Natural sway motion
-  useEffect(() => {
-    let frame: number;
-    const animate = (time: number) => {
-      setSway(Math.sin(time / 1200) * 1.2);
-      frame = requestAnimationFrame(animate);
-    };
-    frame = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frame);
-  }, []);
-
-  // Mouth animation logic
-  const mouthHeight = isTalking ? Math.max(2, volume * 18) : 0;
-  const mouthWidth = isTalking ? 7 + volume * 3 : 9;
+  // Map volume to mouth opening height (0 to 15 units)
+  const mouthOpening = isTalking ? Math.max(2, volume * 18) : 0;
+  
+  // Cat colors based on "gender" (voice profile)
+  const primaryColor = gender === 'girl' ? '#FEE2E2' : '#E0E7FF'; // Pinkish vs Bluish
+  const secondaryColor = gender === 'girl' ? '#FCA5A5' : '#93C5FD';
+  const earColor = gender === 'girl' ? '#FECACA' : '#BFDBFE';
 
   return (
-    <div className="relative w-64 h-64 mx-auto perspective-1000 select-none">
-      {/* Glow Behind Avatar */}
-      <div className={`absolute inset-0 rounded-full bg-indigo-500/10 blur-[80px] transition-opacity duration-1000 ${isTalking ? 'opacity-100' : 'opacity-40'}`}></div>
-      
+    <div className="relative w-64 h-64 mx-auto flex items-center justify-center">
+      {/* Background Glow */}
       <div 
-        className="w-full h-full relative transition-transform duration-300 ease-out flex items-center justify-center"
-        style={{ transform: `rotateY(${sway}deg) translateY(${Math.sin(Date.now() / 2500) * 3}px)` }}
-      >
-        <svg 
-          viewBox="0 0 200 200" 
-          className="w-full h-full drop-shadow-[0_15px_30px_rgba(0,0,0,0.3)]"
-        >
-          <defs>
-            <radialGradient id="cuteSkin" cx="50%" cy="40%" r="60%">
-              <stop offset="0%" stopColor="#fff1f1" />
-              <stop offset="100%" stopColor="#fee2e2" />
-            </radialGradient>
-            <linearGradient id="outfitGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor={gender === 'girl' ? "#a855f7" : "#4f46e5"} />
-              <stop offset="100%" stopColor={gender === 'girl' ? "#7e22ce" : "#3730a3"} />
-            </linearGradient>
-            <filter id="blush">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" />
-            </filter>
-          </defs>
+        className="absolute inset-0 rounded-full transition-all duration-300 ease-out blur-3xl opacity-20"
+        style={{
+          background: isTalking ? 'rgba(99, 102, 241, 0.8)' : 'rgba(99, 102, 241, 0.2)',
+          transform: `scale(${1 + volume * 0.5})`
+        }}
+      ></div>
 
-          {/* Torso & Professional Cute Outfit */}
-          <g transform="translate(0, 10)">
-            <path d="M 50 190 Q 50 160 70 155 L 130 155 Q 150 160 150 190 Z" fill="url(#outfitGrad)" />
-            <path d="M 70 155 L 100 185 L 130 155 Z" fill="#ffffff" opacity="0.9" />
-            <circle cx="100" cy="180" r="1.5" fill={gender === 'girl' ? "#7e22ce" : "#4f46e5"} />
-            <circle cx="100" cy="190" r="1.5" fill={gender === 'girl' ? "#7e22ce" : "#4f46e5"} />
-          </g>
+      <svg viewBox="0 0 200 200" className="w-full h-full drop-shadow-2xl relative z-10 overflow-visible">
+        <defs>
+          <linearGradient id="catGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={primaryColor} />
+            <stop offset="100%" stopColor={secondaryColor} />
+          </linearGradient>
+          <clipPath id="mouthClip">
+            <rect x="80" y="135" width="40" height="30" rx="10" />
+          </clipPath>
+        </defs>
 
-          {/* Neck */}
-          <rect x="92" y="140" width="16" height="18" fill="#fee2e2" />
+        {/* Ears with twitch animation */}
+        <g className={isTalking ? 'animate-ear-twitch' : ''}>
+          <path d="M50 80 L30 30 L80 60 Z" fill={earColor} />
+          <path d="M150 80 L170 30 L120 60 Z" fill={earColor} />
+        </g>
 
-          {/* Head Shape */}
-          <path d="M 70 95 Q 70 40 100 40 Q 130 40 130 95 Q 130 145 100 150 Q 70 145 70 95" fill="url(#cuteSkin)" />
+        {/* Head */}
+        <circle cx="100" cy="100" r="75" fill="url(#catGradient)" />
+
+        {/* Cheeks */}
+        <circle cx="65" cy="125" r="15" fill="#FFB6C1" opacity="0.4" />
+        <circle cx="135" cy="125" r="15" fill="#FFB6C1" opacity="0.4" />
+
+        {/* Eyes with blinking */}
+        <g className="animate-blink">
+          <circle cx="70" cy="90" r="8" fill="#1F2937" />
+          <circle cx="130" cy="90" r="8" fill="#1F2937" />
+          <circle cx="73" cy="87" r="3" fill="white" />
+          <circle cx="133" cy="87" r="3" fill="white" />
+        </g>
+
+        {/* Nose */}
+        <path d="M95 115 L105 115 L100 122 Z" fill="#F472B6" />
+
+        {/* Whiskers */}
+        <g stroke="#94A3B8" strokeWidth="2" strokeLinecap="round">
+          <line x1="60" y1="115" x2="30" y2="110" />
+          <line x1="60" y1="125" x2="30" y2="125" />
+          <line x1="140" y1="115" x2="170" y2="110" />
+          <line x1="140" y1="125" x2="170" y2="125" />
+        </g>
+
+        {/* Lip-Syncing Mouth */}
+        <g transform="translate(100, 135)">
+          {/* Static upper lip part */}
+          <path 
+            d="M-15 0 C-15 8, -2 12, 0 12 C2 12, 15 8, 15 0" 
+            fill="none" 
+            stroke="#1F2937" 
+            strokeWidth="3" 
+            strokeLinecap="round" 
+          />
           
-          {/* Blush */}
-          <circle cx="82" cy="115" r="7" fill="#fecaca" opacity="0.5" filter="url(#blush)" />
-          <circle cx="118" cy="115" r="7" fill="#fecaca" opacity="0.5" filter="url(#blush)" />
+          {/* Dynamic inner mouth (reactive to volume) */}
+          <ellipse 
+            cx="0" 
+            cy={5 + mouthOpening/2} 
+            rx="8" 
+            ry={mouthOpening} 
+            fill="#EF4444" 
+            className="transition-all duration-75"
+          />
+        </g>
+      </svg>
 
-          {/* Hair Styling */}
-          <g>
-            {gender === 'girl' ? (
-              <path 
-                d="M 65 100 Q 60 25 100 25 Q 140 25 135 100 Q 145 140 130 160 Q 120 120 115 100 Q 115 55 100 55 Q 85 55 85 100 Q 80 120 70 160 Q 55 140 65 100" 
-                fill="#4a3728" 
-              />
-            ) : (
-              <path 
-                d="M 68 95 Q 68 35 100 32 Q 132 35 132 95 Q 130 80 115 75 Q 100 75 85 75 Q 70 80 68 95" 
-                fill="#2d1b0d" 
-              />
-            )}
-          </g>
-
-          {/* Large Expressive Eyes */}
-          <g>
-            {blink ? (
-              <g stroke="#8d6e63" strokeWidth="2" strokeLinecap="round">
-                <path d="M 78 95 Q 85 95 92 95" />
-                <path d="M 108 95 Q 115 95 122 95" />
-              </g>
-            ) : (
-              <g>
-                <ellipse cx="85" cy="95" rx="7" ry="6" fill="white" />
-                <ellipse cx="115" cy="95" rx="7" ry="6" fill="white" />
-                <circle cx="85" cy="95" r="5" fill="#5c4033" />
-                <circle cx="115" cy="95" r="5" fill="#5c4033" />
-                <circle cx="87" cy="93" r="1.8" fill="white" />
-                <circle cx="117" cy="93" r="1.8" fill="white" />
-              </g>
-            )}
-          </g>
-
-          {/* Small Cute Nose */}
-          <path d="M 98 112 Q 100 115 102 112" fill="none" stroke="#fca5a5" strokeWidth="1.2" strokeLinecap="round" />
-
-          {/* Mouth */}
-          <g transform="translate(100, 132)">
-            {isTalking ? (
-              <ellipse 
-                cx="0" 
-                cy="0" 
-                rx={mouthWidth} 
-                ry={mouthHeight / 2} 
-                fill="#991b1b" 
-              />
-            ) : (
-              <path 
-                d="M -7 -1 Q 0 3 7 -1" 
-                fill="none" 
-                stroke="#b91c1c" 
-                strokeWidth="1.5" 
-                strokeLinecap="round" 
-              />
-            )}
-          </g>
-        </svg>
-      </div>
+      {/* Floating status badge */}
+      {isTalking && (
+        <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[10px] font-black px-2 py-1 rounded-lg animate-bounce shadow-xl">
+          MIAW!
+        </div>
+      )}
 
       <style>{`
-        @keyframes gentlePulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.01); }
+        @keyframes ear-twitch {
+          0%, 90%, 100% { transform: rotate(0deg); }
+          95% { transform: rotate(-5deg); }
         }
-        .perspective-1000 {
-          perspective: 1000px;
+        @keyframes blink {
+          0%, 90%, 100% { transform: scaleY(1); }
+          95% { transform: scaleY(0.1); }
         }
-        .w-full.h-full.relative {
-          animation: gentlePulse 5s ease-in-out infinite;
+        .animate-ear-twitch {
+          animation: ear-twitch 4s infinite;
+          transform-origin: center;
+        }
+        .animate-blink {
+          animation: blink 5s infinite;
+          transform-origin: 100px 90px;
         }
       `}</style>
     </div>

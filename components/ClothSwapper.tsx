@@ -2,7 +2,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI } from '@google/genai';
 
-const ClothSwapper: React.FC = () => {
+// Fix: Updated component to accept lang and t props as passed from App.tsx
+const ClothSwapper: React.FC<{ lang: string; t: any }> = ({ lang, t }) => {
   const [personImg, setPersonImg] = useState<string | null>(null);
   const [clothImg, setClothImg] = useState<string | null>(null);
   const [resultImg, setResultImg] = useState<string | null>(null);
@@ -130,7 +131,7 @@ const ClothSwapper: React.FC = () => {
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-widest mb-2">
           <i className="fa-solid fa-crown"></i> 4K Ultra-HD Processing
         </div>
-        <h2 className="text-4xl font-extrabold tracking-tight">Pro Cloth Swapper</h2>
+        <h2 className="text-4xl font-extrabold tracking-tight">{t.clothSwap}</h2>
         <p className="text-gray-400 max-w-xl mx-auto">Seamlessly transfer garments while preserving your original photo's full background and quality.</p>
       </div>
 
@@ -138,7 +139,7 @@ const ClothSwapper: React.FC = () => {
         {/* Person Upload */}
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <label className="text-xs font-black text-gray-500 uppercase tracking-widest">1. Reference Model</label>
+            <label className="text-xs font-black text-gray-500 uppercase tracking-widest">{t.uploadPerson}</label>
             {personImg && <span className="text-[10px] bg-indigo-500 text-white font-bold px-2 py-0.5 rounded shadow-lg shadow-indigo-500/20">Original Ratio: {detectedRatio}</span>}
           </div>
           <div 
@@ -154,7 +155,7 @@ const ClothSwapper: React.FC = () => {
                 <div className="w-16 h-16 bg-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-indigo-600 transition-colors">
                   <i className="fa-solid fa-user-astronaut text-2xl text-gray-500 group-hover:text-white"></i>
                 </div>
-                <span className="text-sm font-bold text-gray-400">Upload Person</span>
+                <span className="text-sm font-bold text-gray-400">{t.uploadPerson}</span>
                 <p className="text-[10px] text-gray-600 mt-2 uppercase tracking-tighter">Full body or portrait</p>
               </div>
             )}
@@ -164,7 +165,7 @@ const ClothSwapper: React.FC = () => {
 
         {/* Cloth Upload */}
         <div className="space-y-4">
-          <label className="text-xs font-black text-gray-500 uppercase tracking-widest">2. Target Garment</label>
+          <label className="text-xs font-black text-gray-500 uppercase tracking-widest">{t.uploadCloth}</label>
           <div 
             onClick={() => !isProcessing && clothInputRef.current?.click()}
             className={`aspect-[4/5] bg-gray-800 border-2 border-dashed rounded-[2rem] flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden relative group ${
@@ -178,7 +179,7 @@ const ClothSwapper: React.FC = () => {
                 <div className="w-16 h-16 bg-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-600 transition-colors">
                   <i className="fa-solid fa-shirt text-2xl text-gray-500 group-hover:text-white"></i>
                 </div>
-                <span className="text-sm font-bold text-gray-400">Upload Clothing</span>
+                <span className="text-sm font-bold text-gray-400">{t.uploadCloth}</span>
                 <p className="text-[10px] text-gray-600 mt-2 uppercase tracking-tighter">Flat lay or product shot</p>
               </div>
             )}
